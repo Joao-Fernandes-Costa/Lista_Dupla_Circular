@@ -1,151 +1,209 @@
-// Exercício 3: Lista Encadeada Circular Simples
+import java.util.Scanner;
 
-class Node {
-    int data;
-    Node next;
-    Node(int data) {
-        this.data = data;
-        this.next = null;
-    }
-}
+public class Numero3 {
 
-class Numero3 {
-    Node tail;
-
-    public Numero3() {
-        this.tail = null;
-    }
-
-    public void insertAtEnd(int data) {
-        Node newNode = new Node(data);
-        if (tail == null) {
-            tail = newNode;
-            tail.next = tail;
-        } else {
-            newNode.next = tail.next;
-            tail.next = newNode;
-            tail = newNode;
+    static class No {
+        int dado;
+        No proximo;
+        public No(int dado) {
+            this.dado = dado;
+            this.proximo = null;
         }
     }
 
-    // a
-    public int count() {
-        if (tail == null) {
-            return 0;
+    static class ListaCircular {
+        private No fim;
+
+        public ListaCircular() {
+            this.fim = null;
         }
 
-        int count = 0;
-        Node start = tail.next;
-        Node current = start;
-        do {
-            count++;
-            current = current.next;
-        } while (current != start);
-
-        return count;
-    }
-
-    // b
-    public void insertLeftOfHead(int data) {
-        Node newNode = new Node(data);
-        if (tail == null) {
-            tail = newNode;
-            tail.next = tail;
-        } else {
-            newNode.next = tail.next;
-            tail.next = newNode;
-            tail = newNode;
-        }
-    }
-
-    // c
-    public static Numero3 concatenate(Numero3 list1, Numero3 list2) {
-        if (list1.tail == null) {
-            return list2;
-        }
-        if (list2.tail == null) {
-            return list1;
+        public boolean isEmpty() {
+            return this.fim == null;
         }
 
-        Node head1 = list1.tail.next;
-        Node head2 = list2.tail.next;
-
-        list1.tail.next = head2; 
-        list2.tail.next = head1; 
-
-        Numero3 newList = new Numero3();
-        newList.tail = list2.tail; 
-
-        list1.tail = null; 
-        list2.tail = null;
-
-        return newList;
-    }
-
-    // d
-    public static Numero3 mergeOrdered(Numero3 list1, Numero3 list2) {
-        if (list1.tail == null) return list2;
-        if (list2.tail == null) return list1;
-
-        Node h1 = list1.tail.next;
-        Node h2 = list2.tail.next;
-        list1.tail.next = null; 
-        list2.tail.next = null;
-
-        Node mergedHead = null;
-        Node mergedTail = null;
-
-        if (h1.data <= h2.data) {
-            mergedHead = h1;
-            h1 = h1.next;
-        } else {
-            mergedHead = h2;
-            h2 = h2.next;
-        }
-        mergedTail = mergedHead;
-
-        while (h1 != null && h2 != null) {
-            if (h1.data <= h2.data) {
-                mergedTail.next = h1;
-                h1 = h1.next;
-            } else {
-                mergedTail.next = h2;
-                h2 = h2.next;
+        public int contarElementos() {
+            if (isEmpty()) {
+                return 0;
             }
-            mergedTail = mergedTail.next;
+            int cont = 0;
+            No atual = fim.proximo;
+            do {
+                cont++;
+                atual = atual.proximo;
+            } while (atual != fim.proximo);
+            return cont;
         }
 
-        if (h1 != null) {
-            mergedTail.next = h1;
+        public void inserirInicio(int dado) {
+            No novo = new No(dado);
+            if (isEmpty()) {
+                fim = novo;
+                fim.proximo = fim;
+            } else {
+                novo.proximo = fim.proximo;
+                fim.proximo = novo;
+            }
         }
-        if (h2 != null) {
-            mergedTail.next = h2;
+        
+        public void concatenar(ListaCircular outra) {
+            if (outra.isEmpty()) return;
+            
+            if (this.isEmpty()) {
+                this.fim = outra.fim;
+            } else {
+                No inicio1 = this.fim.proximo;
+                No inicio2 = outra.fim.proximo;
+                
+                this.fim.proximo = inicio2;
+                outra.fim.proximo = inicio1;
+                
+                this.fim = outra.fim;
+            }
+            outra.fim = null;
+        }
+        
+        public static ListaCircular intercalarOrdenadas(ListaCircular l1, ListaCircular l2) {
+            ListaCircular nova = new ListaCircular();
+            if (l1.isEmpty()) return l2.fazerCopia();
+            if (l2.isEmpty()) return l1.fazerCopia();
+
+            No p1 = l1.fim.proximo;
+            No p2 = l2.fim.proximo;
+            int c1 = l1.contarElementos();
+            int c2 = l2.contarElementos();
+            int i = 0, j = 0;
+
+            while (i < c1 && j < c2) {
+                if (p1.dado <= p2.dado) {
+                    nova.inserirFim(p1.dado);
+                    p1 = p1.proximo;
+                    i++;
+                } else {
+                    nova.inserirFim(p2.dado);
+                    p2 = p2.proximo;
+                    j++;
+                }
+            }
+            while (i < c1) {
+                nova.inserirFim(p1.dado);
+                p1 = p1.proximo;
+                i++;
+            }
+            while (j < c2) {
+                nova.inserirFim(p2.dado);
+                p2 = p2.proximo;
+                j++;
+            }
+            return nova;
         }
 
-        while (mergedTail.next != null) {
-            mergedTail = mergedTail.next;
+        public ListaCircular fazerCopia() {
+            ListaCircular copia = new ListaCircular();
+            if (isEmpty()) return copia;
+            
+            No atual = fim.proximo;
+            do {
+                copia.inserirFim(atual.dado);
+                atual = atual.proximo;
+            } while (atual != fim.proximo);
+            
+            return copia;
         }
 
-        mergedTail.next = mergedHead;
-
-        Numero3 mergedList = new Numero3();
-        mergedList.tail = mergedTail;
-        return mergedList;
+        public void imprimir(String nome) {
+            if (isEmpty()) {
+                System.out.println(nome + ": [ VAZIA ]");
+                return;
+            }
+            System.out.print(nome + ": [ ");
+            No atual = fim.proximo;
+            do {
+                System.out.print(atual.dado + " ");
+                atual = atual.proximo;
+            } while (atual != fim.proximo);
+            System.out.println("]");
+        }
+        
+        public void inserirFim(int dado) {
+            if (isEmpty()) {
+                inserirInicio(dado);
+            } else {
+                No novo = new No(dado);
+                novo.proximo = fim.proximo;
+                fim.proximo = novo;
+                fim = novo;
+            }
+        }
     }
 
-    // e
-    public Numero3 copy() {
-        Numero3 newList = new Numero3();
-        if (tail == null) {
-            return newList;
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        ListaCircular l1 = new ListaCircular();
+        ListaCircular l2 = new ListaCircular();
+        int escolha = 0;
+        int valor;
+        
+        while (escolha != 9) {
+            System.out.println("1. Inserir Início (L1)");
+            System.out.println("2. Inserir Início (L2)");
+            System.out.println("3. Imprimir L1 e L2");
+            System.out.println("4. Contar (L1)");
+            System.out.println("5. Concatenar (L1 += L2)");
+            System.out.println("6. Intercalar (L1, L2)");
+            System.out.println("7. Copiar (L1)");   
+            System.out.println("8. Inserir Fim (L1)");
+            System.out.println("9. Sair");
+            System.out.print("Escolha: ");
+            escolha = scanner.nextInt();
+
+            switch (escolha) {
+                case 1:
+                    System.out.print("Valor p/ L1: ");
+                    valor = scanner.nextInt();
+                    l1.inserirInicio(valor);
+                    break;
+                case 2:
+                    System.out.print("Valor p/ L2: ");
+                    valor = scanner.nextInt();
+                    l2.inserirInicio(valor);
+                    break;
+                case 3:
+                    l1.imprimir("L1");
+                    l2.imprimir("L2");
+                    break;
+                case 4:
+                    System.out.println("L1 tem " + l1.contarElementos() + " elementos.");
+                    break;
+                case 5:
+                    System.out.println("Concatenando L1 e L2...");
+                    l1.concatenar(l2);
+                    l1.imprimir("Nova L1");
+                    l2.imprimir("L2 (vazia)");
+                    break;
+                case 6:
+                    System.out.println("Intercalando L1 e L2 (listas DEVEM estar ordenadas)...");
+                    ListaCircular inter = ListaCircular.intercalarOrdenadas(l1, l2);
+                    inter.imprimir("Intercalada");
+                    break;
+                case 7:
+                    System.out.println("Copiando L1...");
+                    ListaCircular copia = l1.fazerCopia();
+                    copia.imprimir("Cópia");
+                    l1.imprimir("Original L1");
+                    break;
+                case 8:
+                    System.out.print("Valor (Fim) p/ L1: ");
+                    valor = scanner.nextInt();
+                    l1.inserirFim(valor);
+                    break;
+                case 9:
+                    System.out.println("Saindo...");
+                    break;
+                default:
+                    System.out.println("Opção inválida.");
+            }
         }
-
-        Node current = tail.next; 
-        do {
-            newList.insertAtEnd(current.data); 
-            current = current.next;
-        } while (current != tail.next);
-
-        return newList;
+        scanner.close();
     }
 }
